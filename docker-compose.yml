@@ -4,5 +4,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    environment:
+      REDIS_HOST: "${REDIS_HOST}"
+      REDIS_PORT: "${REDIS_PORT}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
     ports:
       - '8076:80'
