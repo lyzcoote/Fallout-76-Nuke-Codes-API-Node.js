@@ -6,6 +6,11 @@
 # Description
 This repository contains a Node.js application that interacts with the NukaCrypt API to retrieve data about nuclear launch codes. The application is built using Express.js and Puppeteer, and it utilizes Redis for caching the retrieved data.
 
+## Demo
+A Demo is available at this [link](https://f76.wickerbeast.gay/).
+
+***This demo is not always up to date with the latest version of the application.***
+
 ## Why Redis?
 
 The NukaCrypt API is in reality the whole NukaCrypt site, which returns the Nuke Codes via GraphQL request.
