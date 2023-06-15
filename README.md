@@ -100,9 +100,9 @@ The available API endpoint is `/`, which returns the nuclear launch codes retrie
 
 The API response is in JSON format and contains the following properties:
 
-- `Alpha`: The alpha launch code.
-- `Bravo`: The bravo launch code.
-- `Charlie`: The charlie launch code.
+- `Alpha`: The Alpha Site launch code.
+- `Bravo`: The Bravo Site launch code.
+- `Charlie`: The Charlie Site launch code.
 - `ResetsIn`: The time until the launch codes reset.
 - `RenewalTime`: The estimated time of the next launch code reset.
 - `Cached`: Indicates whether the response was retrieved from the Redis cache (`true`) or fetched from NukaCrypt (`false`).
