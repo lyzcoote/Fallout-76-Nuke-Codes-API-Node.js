@@ -21,6 +21,8 @@ const start = async () => {
         process.exit(1);
     }
     else {
+        console.log('Connecting to Redis...\nHost:', process.env.REDIS_HOST, '\nPort:', process.env.REDIS_PORT, '' +
+            '\nPass:', process.env.REDIS_PASS, '\n');
         await redisClient.connect();
     }
 };
