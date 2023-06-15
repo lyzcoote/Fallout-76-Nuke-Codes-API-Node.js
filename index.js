@@ -18,10 +18,10 @@ const start = async () => {
     await redisClient.connect();
 };
 const redisClient = redis.createClient({
-    password: 'FurryYiff69!',
+    password: 'REDIS-PASSWORD',
     socket: {
-        host: 'redis-10058.c250.eu-central-1-1.ec2.cloud.redislabs.com',
-        port: 10058
+        host: 'REDIS-HOST',
+        port: 'REDIS-PORT'
     }
 });
 
