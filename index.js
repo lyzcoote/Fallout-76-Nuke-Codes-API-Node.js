@@ -15,13 +15,20 @@ const app = express();
 
 // Setup Redis
 const start = async () => {
-    await redisClient.connect();
+    if(process.env.REDIS_PASS === undefined || process.env.REDIS_HOST === undefined || process.env.REDIS_PORT === undefined)
+    {
+        console.error('Redis environment variables not set! Exiting...');
+        process.exit(1);
+    }
+    else {
+        await redisClient.connect();
+    }
 };
 const redisClient = redis.createClient({
-    password: 'REDIS-PASSWORD',
+    password: process.env.REDIS_PASS,
     socket: {
-        host: 'REDIS-HOST',
-        port: 'REDIS-PORT'
+        host: process.env.REDIS_HOST,
+        port: process.env.REDIS_PORT
     }
 });
 
