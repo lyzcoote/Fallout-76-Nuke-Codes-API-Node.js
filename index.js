@@ -9,6 +9,8 @@ const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
 const redis = require('redis');
+const LogManager = require('./logManager');
+const logger = new LogManager();
 
 // Initialize Express and Redis
 const app = express();
@@ -17,12 +19,11 @@ const app = express();
 const start = async () => {
     if(process.env.REDIS_PASS === undefined || process.env.REDIS_HOST === undefined || process.env.REDIS_PORT === undefined)
     {
-        console.error('Redis environment variables not set! Exiting...');
+        logger.error('[REDIS] - REDIS_PASS, REDIS_HOST, or REDIS_PORT is undefined! Please check your host environment variables and try again.');
         process.exit(1);
     }
     else {
-        console.log('Connecting to Redis...\nHost:', process.env.REDIS_HOST, '\nPort:', process.env.REDIS_PORT, '' +
-            '\nPass:', process.env.REDIS_PASS, '\n');
+        logger.info('[REDIS] - Connecting to Redis...');
         await redisClient.connect();
     }
 };
@@ -42,19 +43,18 @@ const redisClient = redis.createClient({
 
 // Connect to Redis and handle errors
 start().then(() => {
-    console.log('Connected to Redis');
+    logger.info('[REDIS] - Connected to Redis');
 }).catch(error => {
-    console.error('Failed to connect to Redis:', error);
+    console.error('[REDIS] - Failed to connect to Redis:', error);
     process.exit(1);
 });
 
 // Log requests to console for debugging reasons, this will be replaced with a proper logger later
 app.use((req, res, next) => {
-    const timestamp = new Date().toLocaleString();
     const userAgent = req.headers['user-agent'];
     const ip = req.ip;
 
-    console.log(`[${timestamp}] Request from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
+    logger.debug(`[API] - Request from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
     next();
 });
 
@@ -76,18 +76,19 @@ app.get('/', async (req, res) => {
         }
         catch (err)
         {
-            console.warn('FAILED TO RUN REGEX! Error:\n', err);
+            logger.warn('[REGEX] - Regex failed to run!');
+            logger.warn(err);
         }
 
         // If the client requested no-cache, fetch manually from NukaCrypt without saving to Redis
         if (req.headers['no-cache'] === 'true')
         {
-            console.log("Client requested no-cache, fetching from NukaCrypt");
+            logger.debug("[API] - Client requested no-cache, fetching from NukaCrypt");
             await getFromNukaCrypt(req, res, force = true);
         }
         else if (cacheValues.every(value => value !== null)) // If all cache values are not null, return them from the Redis cache
         {
-            console.log('Retrieved data from cache');
+            logger.debug('[REDIS -> FETCHER] - Retrieved data from cache');
 
             const response = {
                 Alpha: cacheValues[0],
@@ -149,19 +150,20 @@ function calculateRenewalTime(currentTime, resetsInTime) {
 
 // Start Express
 app.listen(80, () => {
-    console.log('Server is running on port 80');
+    logger.info('[EXPRE] - Server is running on port 80');
 });
 
 // Handle SIGINT (Ctrl+C) and disconnect from Redis
 process.on('SIGINT', async () => {
-    console.log('Received SIGINT. Calling save function...');
+    logger.warn('[SYSTM] - Received SIGINT. Calling save function...');
     await redisClient.disconnect();
     process.exit(0);
 });
 
 // Get data from NukaCrypt
 async function getFromNukaCrypt(req, res, force) {
-    console.log('Retrieving data from NukaCrypt...\nTHIS MAY TAKE A WHILE!');
+    logger.info('[FTCHR] - Fetching data from NukaCrypt...');
+    logger.warn('[FTCHR] - THIS MAY TAKE A WHILE!');
 
     // Main try block
     try {
@@ -191,8 +193,6 @@ async function getFromNukaCrypt(req, res, force) {
         const resetsInTime = resetsIn ? parseResetTime(resetsIn) : null;
         const renewalTime = resetsInTime ? calculateRenewalTime(new Date(), resetsInTime) : null;
 
-        console.log('Retrieved data from NukaCrypt is:\n', alphaCode, bravoCode, charlieCode, resetsIn, renewalTime);
-
         // Setup response
         const response = {
             Alpha: alphaCode,
@@ -206,14 +206,14 @@ async function getFromNukaCrypt(req, res, force) {
         if(!force)
         {
             // Saving to Redis
-            console.log("Saving to Redis cache...");
+            logger.info('[FETCHER -> REDIS] - Saving to Redis');
             for (const [key, value] of Object.entries(response))
             {
                 try {
                     await redisClient.set(key, value);
-                    console.log(`Set ${key} to ${value}`);
+                    logger.debug(`[REDIS] - Set ${key} to ${value}`);
                 } catch (err) {
-                    console.error(err);
+                    console.error("An error occurred:" + err);
                 }
             }
         }
@@ -226,7 +226,7 @@ async function getFromNukaCrypt(req, res, force) {
         res.json(response);
     }
     catch (error) {
-        console.error(error);
+        console.error("Main App Crash: \n" + error);
         res.status(500).json({ result: 'error', error: error.message });
     }
 }

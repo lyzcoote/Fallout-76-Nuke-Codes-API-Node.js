@@ -1,5 +1,4 @@
 const util = require('util');
-const argv = require('yargs').argv;
 const dateFormat = require('dateformat');
 
 module.exports = class LogManager {
@@ -12,13 +11,13 @@ module.exports = class LogManager {
 
     initializeLogFileName() {
         const dateNow = new Date();
-        this.logFileName = util.format('%s.log', dateFormat(dateNow, 'yyyy-mm-dd HH-MM-ss'));
+        this.logFileName = util.format('%s.log', dateFormat(dateNow, 'yyyy-mm-dd HH-MM-ss-l'));
     }
 
     logLine(level, message) {
         const dateNow = new Date();
-        const dateLOG = dateFormat(dateNow, 'dd/mm/yyyy HH:MM:ss');
-        return util.format('[%s] - %s - %s\n', dateLOG, level, typeof message === 'object' ? JSON.stringify(message) : message);
+        const dateLOG = dateFormat(dateNow, 'dd/mm/yyyy HH:MM:ss:l');
+        return util.format('[%s] - [%s] - %s\n', dateLOG, level, typeof message === 'object' ? JSON.stringify(message) : message);
     }
 
     info(message) {
@@ -31,11 +30,16 @@ module.exports = class LogManager {
         this.logToConsole(logLine);
     }
 
-    error(exception) {
+    error(message) {
+        const logLine = this.logLine('ERROR', message);
+        this.logToConsole(logLine);
+    }
+
+    crash(exception) {
         const errorMessage = exception.message || exception;
         const stackTrace = exception.stack || '';
-        const logLine = this.logLine('ERROR', errorMessage);
-        const errorLogLine = this.logLine('ERROR', stackTrace);
+        const logLine = this.logLine('CRASH', errorMessage);
+        const errorLogLine = this.logLine('CRASH', stackTrace);
 
         this.logToConsole(logLine);
         console.log('STACK TRACE:', stackTrace);
