@@ -5,10 +5,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:digitalocean": "npm install --production=false && npm run build && npm run run",
+    "build:digitalocean": "npm install --production=false && npm run puppeteer && npm run server",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "node node_modules/puppeteer/install.js",
-    "run": "node index.js"
+    "puppeteer": "node node_modules/puppeteer/install.js",
+    "server": "node index.js"
   },
   "keywords": [],
   "author": "",
