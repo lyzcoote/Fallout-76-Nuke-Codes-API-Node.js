@@ -102,6 +102,7 @@ app.get('/', async (req, res) => {
             };
 
             res.json(response);
+            logger.info('[API] - Response sent to client');
         }
         else // If any of the cache values are null, fetch from NukaCrypt and save to Redis
         {
@@ -224,6 +225,7 @@ async function getFromNukaCrypt(req, res, force) {
         response.isTimeAprox = false;
 
         res.json(response);
+        logger.info('[API] - Response sent to client');
     }
     catch (error) {
         console.error("Main App Crash: \n" + error);
