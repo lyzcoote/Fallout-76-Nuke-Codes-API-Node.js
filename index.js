@@ -170,8 +170,8 @@ async function getFromNukaCrypt(req, res, force) {
     try {
         // Setup Puppeteer
         const browser = await puppeteer.launch({
+            headless: 'new',
             args: [
-                '--headless=new',
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
                 '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
