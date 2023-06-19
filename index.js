@@ -9,7 +9,7 @@ const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
 const redis = require('redis');
-const LogManager = require('./logManager.js');
+const LogManager = require('./logManager');
 const logger = new LogManager();
 
 // Initialize Express and Redis
