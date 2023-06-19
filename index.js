@@ -9,7 +9,7 @@ const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
 const redis = require('redis');
-const LogManager = require('./logManager');
+const LogManager = require('./logManager.js');
 const logger = new LogManager();
 
 // Initialize Express and Redis
@@ -88,7 +88,7 @@ app.get('/', async (req, res) => {
         }
         else if (cacheValues.every(value => value !== null)) // If all cache values are not null, return them from the Redis cache
         {
-            logger.debug('[REDIS -> FETCHER] - Retrieved data from cache');
+            logger.debug('[REDIS -> EXPRESS] - Retrieved data from cache');
 
             const response = {
                 Alpha: cacheValues[0],
@@ -101,7 +101,7 @@ app.get('/', async (req, res) => {
                 isTimeAprox: true
             };
 
-            res.json(response);
+            res.status(200).json(response);
             logger.info('[API] - Response sent to client');
         }
         else // If any of the cache values are null, fetch from NukaCrypt and save to Redis
@@ -150,21 +150,21 @@ function calculateRenewalTime(currentTime, resetsInTime) {
 }
 
 // Start Express
-app.listen(80, () => {
-    logger.info('[EXPRE] - Server is running on port 80');
+app.listen(8076, () => {
+    logger.info('[EXPRESS] - Server is running on port 80');
 });
 
 // Handle SIGINT (Ctrl+C) and disconnect from Redis
 process.on('SIGINT', async () => {
-    logger.warn('[SYSTM] - Received SIGINT. Calling save function...');
+    logger.warn('[SYSTEM] - Received SIGINT. Calling save function...');
     await redisClient.disconnect();
     process.exit(0);
 });
 
 // Get data from NukaCrypt
 async function getFromNukaCrypt(req, res, force) {
-    logger.info('[FTCHR] - Fetching data from NukaCrypt...');
-    logger.warn('[FTCHR] - THIS MAY TAKE A WHILE!');
+    logger.info('[FETCHER] - Fetching data from NukaCrypt...');
+    logger.warn('[FETCHER] - THIS MAY TAKE A WHILE!');
 
     // Main try block
     try {
@@ -174,7 +174,7 @@ async function getFromNukaCrypt(req, res, force) {
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36',
+                '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
                 '--disable-extensions',
             ],
         });
@@ -203,13 +203,19 @@ async function getFromNukaCrypt(req, res, force) {
             RenewalTime: renewalTime
         };
 
+        // Return response
+        response.Cached = false;
+        response.PoweredBy = 'Puppeteer';
+        response.isTimeAprox = false;
+
+        res.status(200).json(response);
+        logger.info('[API] - Response sent to client');
+
         // Save to Redis if not forced
-        if(!force)
-        {
+        if (!force) {
             // Saving to Redis
             logger.info('[FETCHER -> REDIS] - Saving to Redis');
-            for (const [key, value] of Object.entries(response))
-            {
+            for (const [key, value] of Object.entries(response)) {
                 try {
                     await redisClient.set(key, value);
                     logger.debug(`[REDIS] - Set ${key} to ${value}`);
@@ -218,17 +224,8 @@ async function getFromNukaCrypt(req, res, force) {
                 }
             }
         }
-
-        // Return response
-        response.Cached = false;
-        response.PoweredBy = 'Puppeteer';
-        response.isTimeAprox = false;
-
-        res.json(response);
-        logger.info('[API] - Response sent to client');
-    }
-    catch (error) {
+    } catch (error) {
         console.error("Main App Crash: \n" + error);
-        res.status(500).json({ result: 'error', error: error.message });
+        res.status(500).json({result: 'error', error: error.message});
     }
 }

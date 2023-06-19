@@ -6,9 +6,9 @@
   "main": "index.js",
   "scripts": {
     "build:digitalocean": "npm install --production=false && npm run puppeteer && npm run server",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "puppeteer": "node node_modules/puppeteer/install.js",
-    "server": "node index.js"
+    "server": "node index.js",
+    "test": "jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -20,6 +20,11 @@
     "firebase": "^9.22.2",
     "node-fetch": "^2.6.1",
     "puppeteer": "^20.5.0",
-    "redis": "^4.6.7"
+    "redis": "^4.6.7",
+    "supertest": "^6.3.3",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0"
   }
 }
