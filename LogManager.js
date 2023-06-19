@@ -19,14 +19,14 @@ module.exports = class LogManager {
     }
 
     checkLogDirectory() {
-        this.logDir = process.env.APPDATA || (process.platform === 'darwin' ? process.env.HOME + '/Library/Preferences' : '/var/local');
+        this.logDir = process.env.APPDATA || (process.platform === 'darwin' ? process.env.HOME + '/Library/Preferences' : '/var/local') || (process.platform === 'linux' ? process.env.HOME + '/.local/share' : '/var/local');
 
         this.logDir = path.join(this.logDir, 'F76 API Server');
 
         this.logFilePath = path.join(this.logDir, this.logFileName);
 
         if (!fs.existsSync(this.logDir)) {
-            console.log('[LOGGER] Creating directory');
+            console.log('[LOGGER] - Creating directory');
             fs.mkdirSync(this.logDir);
         }
 
