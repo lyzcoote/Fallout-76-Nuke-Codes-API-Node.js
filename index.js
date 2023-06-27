@@ -117,6 +117,7 @@ app.get('/', async (req, res) => {
 });
 
 app.post('/purge-cache', isAuth, async (req, res) => {
+    logger.warn('[API] - Purge cache request received');
     try {
         const cacheKeys = ['Alpha', 'Bravo', 'Charlie', 'ResetsIn', 'RenewalTime'];
         await Promise.all(cacheKeys.map(key => redisClient.del(key)));
@@ -124,6 +125,7 @@ app.post('/purge-cache', isAuth, async (req, res) => {
                 result: "success",
                 message: "Cache has been purged",
             };
+        logger.info('[API] - Cache purged')
         res.status(200).json(purgeResponse);
     }
     catch (error) {
