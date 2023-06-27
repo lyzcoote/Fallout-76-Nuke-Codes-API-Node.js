@@ -116,7 +116,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get('/purge-cache', isAuth, async (req, res) => {
+app.post('/purge-cache', isAuth, async (req, res) => {
     try {
         const cacheKeys = ['Alpha', 'Bravo', 'Charlie', 'ResetsIn', 'RenewalTime'];
         await Promise.all(cacheKeys.map(key => redisClient.del(key)));
