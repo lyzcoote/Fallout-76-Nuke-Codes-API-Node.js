@@ -117,26 +117,16 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get('/purge-cache', async (req, res) => {
-    // Insert auth via username/password here
-
-    if(req.body.username === "kraither" && req.body.password === crypto.createHash("sha512").update(process.env.PURGE_PASS).digest("hex"))
-    {
-        try {
-            const cacheKeys = ['Alpha', 'Bravo', 'Charlie', 'ResetsIn', 'RenewalTime'];
-            await Promise.all(cacheKeys.map(key => redisClient.del(key)));
-            res.status(200).json({ result: 'success' });
-        }
-        catch (error) {
-            console.error(error);
-            res.status(500).json({ result: 'error', error: error.message });
-        }
+app.get('/purge-cache', isAuth, async (req, res) => {
+    try {
+        const cacheKeys = ['Alpha', 'Bravo', 'Charlie', 'ResetsIn', 'RenewalTime'];
+        await Promise.all(cacheKeys.map(key => redisClient.del(key)));
+        res.status(200).json({ result: 'success' });
     }
-    else
-    {
-        res.status(401).json({ result: 'error', error: 'Not authorized' });
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ result: 'error', error: error.message });
     }
-
 
 });
 
@@ -260,5 +250,15 @@ async function getFromNukaCrypt(req, res, force) {
     } catch (error) {
         console.error("Main App Crash: \n" + error);
         res.status(500).json({result: 'error', error: error.message});
+    }
+}
+
+function isAuth(req, res, next) {
+    const auth = req.headers.authorization;
+    if (auth === crypto.createHash("sha512").update(process.env.PURGE_PASS).digest("hex")) {
+        next();
+    } else {
+        res.status(401);
+        res.send('Access forbidden');
     }
 }
