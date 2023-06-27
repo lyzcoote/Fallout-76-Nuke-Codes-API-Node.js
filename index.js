@@ -8,7 +8,6 @@
 const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
-const crypto = require('crypto');
 const redis = require('redis');
 const LogManager = require('./LogManager.js');
 const logger = new LogManager();
@@ -255,9 +254,12 @@ async function getFromNukaCrypt(req, res, force) {
 
 function isAuth(req, res, next) {
     const auth = req.headers.authorization;
-    if (auth === crypto.createHash("sha512").update(process.env.PURGE_PASS).digest("hex")) {
+    if (auth && auth === "6ae99e45c2f3cde907d42fc4cef95b01493f060ae79e183333a5d2b8abf79b142bb6fbe1303cd49bafb9dd1b89fb265c1d76f923e99c29029189b37b50b20f5e")
+    {
         next();
-    } else {
+    }
+    else
+    {
         res.status(401);
         res.send('Access forbidden');
     }
