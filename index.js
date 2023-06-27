@@ -8,6 +8,7 @@
 const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
+const crypto = require('crypto');
 const redis = require('redis');
 const LogManager = require('./LogManager.js');
 const logger = new LogManager();
@@ -61,6 +62,7 @@ app.use((req, res, next) => {
 // Main API request handler
 app.get('/', async (req, res) => {
     try {
+        res.setHeader( 'X-Powered-By', 'Not a Windows BackOffice 4.5 Instance running on a MIPS Box emulated by a Protogen' );
         // Get cache values
         const cacheKeys = ['Alpha', 'Bravo', 'Charlie', 'RenewalTime'];
         const cacheValues = await Promise.all(cacheKeys.map(key => redisClient.get(key)));
@@ -115,6 +117,29 @@ app.get('/', async (req, res) => {
     }
 });
 
+app.get('/purge-cache', async (req, res) => {
+    // Insert auth via username/password here
+
+    if(req.body.username === "kraither" && req.body.password === crypto.createHash("sha512").update(process.env.PURGE_PASS).digest("hex"))
+    {
+        try {
+            const cacheKeys = ['Alpha', 'Bravo', 'Charlie', 'ResetsIn', 'RenewalTime'];
+            await Promise.all(cacheKeys.map(key => redisClient.del(key)));
+            res.status(200).json({ result: 'success' });
+        }
+        catch (error) {
+            console.error(error);
+            res.status(500).json({ result: 'error', error: error.message });
+        }
+    }
+    else
+    {
+        res.status(401).json({ result: 'error', error: 'Not authorized' });
+    }
+
+
+});
+
 // ########################################################
 // #                                                      #
 // #                       Functions                      #
@@ -150,7 +175,7 @@ function calculateRenewalTime(currentTime, resetsInTime) {
 }
 
 // Start Express
-app.listen(8076, () => {
+app.listen(80, () => {
     logger.info('[EXPRESS] - Server is running on port 80');
 });
 
@@ -215,12 +240,20 @@ async function getFromNukaCrypt(req, res, force) {
         if (!force) {
             // Saving to Redis
             logger.info('[FETCHER -> REDIS] - Saving to Redis');
-            for (const [key, value] of Object.entries(response)) {
+            // Exclude Cached, PoweredBy and isTimeAprox from saving to Redis
+            let redisResponse = {
+                Alpha: alphaCode,
+                Bravo: bravoCode,
+                Charlie: charlieCode,
+                ResetsIn: resetsIn,
+                RenewalTime: renewalTime
+            };
+            for (const [key, value] of Object.entries(redisResponse)) {
                 try {
                     await redisClient.set(key, value);
                     logger.debug(`[REDIS] - Set ${key} to ${value}`);
                 } catch (err) {
-                    console.error("An error occurred:" + err);
+                    console.error("[REDIS] - An error occurred:" + err);
                 }
             }
         }
