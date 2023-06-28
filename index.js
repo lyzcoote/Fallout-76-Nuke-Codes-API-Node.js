@@ -69,21 +69,30 @@ start().then(() => {
 });
 
 // Log requests to console for debugging reasons, this will be replaced with a proper logger later
-app.use((req, res, next) => {
+app.use((err, req, res, next) => {
     const userAgent = req.headers['user-agent'];
     const ip = req.ip;
 
-    // regex for "Uptime-Kuma/1.xx.xx"
-    if(userAgent.match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g) && (req.headers['cf-connecting-ip'] === "93.48.169.84" || req.ip === "93.48.169.84"))
+    try
     {
-        logger.debug(`[API] - Request n°${requestCount++} from UptimeKuma Bot on Lyz's Zimaboard`);
+        if(userAgent.match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g) && (req.headers['cf-connecting-ip'] === "93.48.169.84" || req.ip === "93.48.169.84"))
+        {
+            logger.debug(`[API] - Request n°${requestCount++} from UptimeKuma Bot on Lyz's Zimaboard`);
+        }
+        else
+        {
+            logger.info(`[API] - Request n°${requestCount++} from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
+        }
     }
-    else
+    catch(err)
     {
-        logger.info(`[API] - Request n°${requestCount++} from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
+        console.error('[API] - Failed to log request to console:', err);
+        res.status(500).json({ result: 'error', error: error.message });
     }
-    
-    next();
+    finally
+    {
+        next();
+    }
 });
 
 // Main API request handler
