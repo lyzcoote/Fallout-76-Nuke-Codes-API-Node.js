@@ -56,7 +56,17 @@ app.use((req, res, next) => {
     const userAgent = req.headers['user-agent'];
     const ip = req.ip;
 
-    logger.debug(`[API] - Request from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
+    // regex for "Uptime-Kuma/1.xx.xx"
+    if(userAgent.match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g) && (req.headers['cf-connecting-ip'] === "93.48.169.84" || req.ip === "93.48.169.84"))
+    {
+        logger.debug(`[API] - Request from UptimeKuma Bot on Lyz's Zimaboard`);
+    }
+    {
+        logger.info(`[API] - Request from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
+    }
+
+
+    
     next();
 });
 
@@ -119,7 +129,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.post('/purge-cache', isAuth, async (req, res) => {
+app.post('/purge-cache', isAuth, async (res) => {
     logger.warn('[API] - Purge cache request received');
     try {
         const cacheKeys = ['Alpha', 'Bravo', 'Charlie', 'ResetsIn', 'RenewalTime'];
@@ -270,7 +280,7 @@ function isAuth(req, res, next) {
     }
     else
     {
-        logger.warn('[API] - Unauthorized access attempt via ' + req.headers['cf-connecting-ip'] + 'in ' + req.headers['cf-ipcountry'] + ' from ' + req.headers['user-agent'] + ' at ' + new Date().toLocaleString('it-IT'));
+        logger.warn('[API] - Unauthorized access attempt via ' + req.headers['cf-connecting-ip'] + ' in ' + req.headers['cf-ipcountry'] + ' from ' + req.headers['user-agent'] + ' at ' + new Date().toLocaleString('it-IT'));
         res.status(401);
         res.send('Access forbidden');
     }
