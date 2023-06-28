@@ -99,4 +99,8 @@ module.exports = class LogManager {
     logToConsole(message) {
         console.log(message);
     }
+
+    returnLogDirectory() {
+        return this.logDir;
+    }
 }

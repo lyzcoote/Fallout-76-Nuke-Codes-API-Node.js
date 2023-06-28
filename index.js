@@ -14,6 +14,7 @@ const logger = new LogManager();
 
 // Initialize Express and Redis
 const app = express();
+let requestCount = 0;
 
 logger.info("Here we go!")
 logger.debug(`Platform: ${process.platform}`);
@@ -22,13 +23,14 @@ logger.debug(`Process ID: ${process.pid}`);
 logger.debug(`Process Title: ${process.title}`);
 logger.debug(`Process Arguments: ${process.argv}`);
 logger.debug(`Process Executable Path: ${process.execPath}`);
+logger.debug(`Log Directory: ${logger.returnLogDirectory()}`);
 
 logger.info('[EXPRESS] - Initializing Express...');
 
 
 // Setup Redis
 const start = async () => {
-    if(process.env.REDIS_PASS === undefined || process.env.REDIS_HOST === undefined || process.env.REDIS_PORT === undefined)
+    if(process.env.REDIS_PASS === undefined && process.env.REDIS_HOST === undefined && process.env.REDIS_PORT === undefined)
     {
         console.error('[REDIS] - REDIS_PASS, REDIS_HOST, or REDIS_PORT is undefined! Please check your host environment variables and try again.');
         process.exit(1);
@@ -74,14 +76,12 @@ app.use((req, res, next) => {
     // regex for "Uptime-Kuma/1.xx.xx"
     if(userAgent.match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g) && (req.headers['cf-connecting-ip'] === "93.48.169.84" || req.ip === "93.48.169.84"))
     {
-        logger.debug(`[API] - Request from UptimeKuma Bot on Lyz's Zimaboard`);
+        logger.debug(`[API] - Request n°${requestCount++} from UptimeKuma Bot on Lyz's Zimaboard`);
     }
     else
     {
-        logger.info(`[API] - Request from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
+        logger.info(`[API] - Request n°${requestCount++} from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
     }
-
-
     
     next();
 });
