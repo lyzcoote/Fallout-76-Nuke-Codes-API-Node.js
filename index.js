@@ -145,7 +145,7 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.post('/purge-cache', isAuth, async (res) => {
+app.post('/purge-cache', isAuth, async (err, res) => {
     logger.warn('[API] - Purge cache request received');
     try {
         const cacheKeys = ['Alpha', 'Bravo', 'Charlie', 'ResetsIn', 'RenewalTime'];
@@ -157,9 +157,9 @@ app.post('/purge-cache', isAuth, async (res) => {
         logger.info('[API] - Cache purged')
         res.status(200).json(purgeResponse);
     }
-    catch (error) {
-        console.error(error);
-        res.status(500).json({ result: 'error', error: error.message });
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ result: 'error', error: err.stack });
     }
 
 });
