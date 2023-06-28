@@ -61,6 +61,7 @@ app.use((req, res, next) => {
     {
         logger.debug(`[API] - Request from UptimeKuma Bot on Lyz's Zimaboard`);
     }
+    else
     {
         logger.info(`[API] - Request from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
     }
