@@ -1,0 +1,7 @@
+node_modules
+.vscode
+.idea
+test.py
+cahcePurger.js
+Debug_Logs
+.idea/Fallout-76-Nuke-Codes-API-Node.js.iml

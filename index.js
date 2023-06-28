@@ -19,7 +19,7 @@ const app = express();
 const start = async () => {
     if(process.env.REDIS_PASS === undefined || process.env.REDIS_HOST === undefined || process.env.REDIS_PORT === undefined)
     {
-        logger.error('[REDIS] - REDIS_PASS, REDIS_HOST, or REDIS_PORT is undefined! Please check your host environment variables and try again.');
+        console.error('[REDIS] - REDIS_PASS, REDIS_HOST, or REDIS_PORT is undefined! Please check your host environment variables and try again.');
         process.exit(1);
     }
     else {
@@ -28,12 +28,14 @@ const start = async () => {
     }
 };
 const redisClient = redis.createClient({
-    password: process.env.REDIS_PASS,
+    password: process.env.REDIS_PASS || 'defaultPassword',
     socket: {
-        host: process.env.REDIS_HOST,
-        port: process.env.REDIS_PORT
+        host: process.env.REDIS_HOST || 'localhost',
+        port: process.env.REDIS_PORT || 6379
     }
 });
+
+
 
 // ########################################################
 // #                                                      #
@@ -79,13 +81,14 @@ app.get('/', async (req, res) => {
         {
             logger.warn('[REGEX] - Regex failed to run!');
             logger.warn(err);
+            res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
         }
 
         // If the client requested no-cache, fetch manually from NukaCrypt without saving to Redis
         if (req.headers['no-cache'] === 'true')
         {
             logger.debug("[API] - Client requested no-cache, fetching from NukaCrypt");
-            await getFromNukaCrypt(req, res, force = true);
+            await getFromNukaCrypt(req, res, true);
         }
         else if (cacheValues.every(value => value !== null)) // If all cache values are not null, return them from the Redis cache
         {
@@ -107,12 +110,12 @@ app.get('/', async (req, res) => {
         }
         else // If any of the cache values are null, fetch from NukaCrypt and save to Redis
         {
-            await getFromNukaCrypt(req, res, force = false);
+            await getFromNukaCrypt(req, res, false);
         }
     }
     catch (error) { // If anything goes wrong, return a 500 error
         console.error(error);
-        res.status(500).json({ result: 'error', error: error.message });
+        res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
     }
 });
 
@@ -130,7 +133,7 @@ app.post('/purge-cache', isAuth, async (req, res) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ result: 'error', error: error.message });
+        res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
     }
 
 });
@@ -249,12 +252,13 @@ async function getFromNukaCrypt(req, res, force) {
                     logger.debug(`[REDIS] - Set ${key} to ${value}`);
                 } catch (err) {
                     console.error("[REDIS] - An error occurred:" + err);
+                    res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
                 }
             }
         }
     } catch (error) {
         console.error("Main App Crash: \n" + error);
-        res.status(500).json({result: 'error', error: error.message});
+        res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
     }
 }
 
@@ -266,6 +270,7 @@ function isAuth(req, res, next) {
     }
     else
     {
+        logger.warn('[API] - Unauthorized access attempt via ' + req.headers['cf-connecting-ip'] + 'in ' + req.headers['cf-ipcountry'] + ' from ' + req.headers['user-agent'] + ' at ' + new Date().toLocaleString('it-IT'));
         res.status(401);
         res.send('Access forbidden');
     }
