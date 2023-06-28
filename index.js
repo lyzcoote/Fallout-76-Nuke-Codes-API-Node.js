@@ -15,6 +15,17 @@ const logger = new LogManager();
 // Initialize Express and Redis
 const app = express();
 
+logger.info("Here we go!")
+logger.debug(`Platform: ${process.platform}`);
+logger.debug(`Node.js Version: ${process.version}`);
+logger.debug(`Process ID: ${process.pid}`);
+logger.debug(`Process Title: ${process.title}`);
+logger.debug(`Process Arguments: ${process.argv}`);
+logger.debug(`Process Executable Path: ${process.execPath}`);
+
+logger.info('[EXPRESS] - Initializing Express...');
+
+
 // Setup Redis
 const start = async () => {
     if(process.env.REDIS_PASS === undefined || process.env.REDIS_HOST === undefined || process.env.REDIS_PORT === undefined)
@@ -23,6 +34,10 @@ const start = async () => {
         process.exit(1);
     }
     else {
+        // Start Express
+        app.listen(80, () => {
+            logger.info('[EXPRESS] - Server is running on port 80');
+        });
         logger.info('[REDIS] - Connecting to Redis...');
         await redisClient.connect();
     }
@@ -92,7 +107,7 @@ app.get('/', async (req, res) => {
         {
             logger.warn('[REGEX] - Regex failed to run!');
             logger.warn(err);
-            res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
+            res.status(500).json({ result: 'error', error: error.message });
         }
 
         // If the client requested no-cache, fetch manually from NukaCrypt without saving to Redis
@@ -126,7 +141,7 @@ app.get('/', async (req, res) => {
     }
     catch (error) { // If anything goes wrong, return a 500 error
         console.error(error);
-        res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
+        res.status(500).json({ result: 'error', error: error.message });
     }
 });
 
@@ -144,7 +159,7 @@ app.post('/purge-cache', isAuth, async (res) => {
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
+        res.status(500).json({ result: 'error', error: error.message });
     }
 
 });
@@ -182,11 +197,6 @@ function calculateRenewalTime(currentTime, resetsInTime) {
 
     return renewalTime.toLocaleString('it-IT', options);
 }
-
-// Start Express
-app.listen(80, () => {
-    logger.info('[EXPRESS] - Server is running on port 80');
-});
 
 // Handle SIGINT (Ctrl+C) and disconnect from Redis
 process.on('SIGINT', async () => {
@@ -263,13 +273,13 @@ async function getFromNukaCrypt(req, res, force) {
                     logger.debug(`[REDIS] - Set ${key} to ${value}`);
                 } catch (err) {
                     console.error("[REDIS] - An error occurred:" + err);
-                    res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
+                    res.status(500).json({ result: 'error', error: error.message });
                 }
             }
         }
     } catch (error) {
         console.error("Main App Crash: \n" + error);
-        res.status(500).json({ result: 'error', error: 'An internal server error occurred.' });
+        res.status(500).json({ result: 'error', error: error.message });
     }
 }
 
