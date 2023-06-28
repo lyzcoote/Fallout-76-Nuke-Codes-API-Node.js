@@ -14,7 +14,7 @@ const logger = new LogManager();
 
 // Initialize Express and Redis
 const app = express();
-let requestCount = 0;
+let requestCount = 1;
 
 logger.info("Here we go!")
 logger.debug(`Platform: ${process.platform}`);
