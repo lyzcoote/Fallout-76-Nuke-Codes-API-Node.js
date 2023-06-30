@@ -83,15 +83,12 @@ app.use((err, req, res, next) => {
         {
             logger.info(`[API] - Request n°${requestCount++} from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
         }
+        next();
     }
     catch(err)
     {
         console.error('[API] - Failed to log request to console:', err);
         res.status(500).json({ result: 'error', error: error.message });
-    }
-    finally
-    {
-        next();
     }
 });
 
