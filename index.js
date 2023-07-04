@@ -74,11 +74,11 @@ app.use((req, res, next) => {
     let isUptimeKuma = req.headers['user-agent'].match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g);
     if(!req.headers['cf-connecting-ip'])
     {
-        logger.debug("[API] - Request from localhost, skipping logging...")
+        logger.debug(`[API] - Request n°${requestCount++} from localhost, skipping logging...`)
     }
     else if(isUptimeKuma && (req.headers['cf-connecting-ip'] == "93.48.169.84" || req.headers['cf-connecting-ip'] == "93.48.169.84"))
     {
-        logger.debug("[API] - Request from Lyz's Uptime Kuma Instace, skipping logging...")
+        logger.debug(`[API] - Request n°${requestCount++} from Lyz's Uptime Kuma Instace, skipping logging...`)
     }
     else
     {
