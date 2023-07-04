@@ -70,27 +70,19 @@ start().then(() => {
 });
 
 // Log requests to console for debugging reasons, this will be replaced with a proper logger later
-app.use((err, req, res, next) => {
-    const userAgent = req.headers['user-agent'];
-    const ip = req.ip;
-    let isUserAgentUpTimeKuma = false;
-
-    try
+app.use((req, res, next) => {
+    let isUptimeKuma = req.headers['user-agent'].match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g);
+    if(!req.headers['cf-connecting-ip'])
     {
-        if(userAgent.match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g) && (req.headers['cf-connecting-ip'] === "93.48.169.84" || req.ip === "93.48.169.84")) isUserAgentUpTimeKuma = true;
+        logger.debug("[API] - Request from localhost, skipping logging...")
     }
-    catch(err)
+    else if(isUptimeKuma)
     {
-        console.error('[API] - Failed to log request to console:', err);
-        res.status(500).json({ result: 'error', error: error.message });
-    }
-    if(isUserAgentUpTimeKuma)
-    {
-        logger.debug(`[API] - Request n°${requestCount++} from UptimeKuma Bot on Lyz's Zimaboard`);
+        logger.debug("[API] - Request from Uptime Kuma, skipping logging...")
     }
     else
     {
-        logger.info(`[API] - Request n°${requestCount++} from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
+        logger.info(`[API] - Request n°${requestCount++} from ${req.headers['cf-connecting-ip'] || req.ip}, User-Agent: ${req.headers['user-agent']}\nHeaders: ${JSON.stringify(req.headers)}\n`);
     }
     next();
 });
