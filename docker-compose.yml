@@ -11,12 +11,4 @@ services:
     ports:
       - '8076:80'
     volumes:
-      - redis-data:/data
-volumes:
-  redis-data:
-    name: redis-data
-    driver: local
-    driver_opts:
-      type: bind
-      device: /srv/docker_data/
-      o: bind
+      - /srv/docker_data:/data
