@@ -14,11 +14,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.26.0",
     "cheerio": "^1.0.0-rc.12",
     "cryptography": "^1.2.3",
     "dateformat": "^4.6.3",
     "express": "^4.18.2",
     "firebase": "^9.22.2",
+    "moment": "^2.29.4",
     "node-fetch": "^2.6.1",
     "puppeteer": "^20.5.0",
     "redis": "^4.6.7",
@@ -27,5 +29,10 @@
   },
   "devDependencies": {
     "jest": "^29.5.0"
+  },
+  "jest": {
+    "setupFiles": [
+      "<rootDir>/.tests/.jest/setEnvVars.js"
+    ]
   }
 }

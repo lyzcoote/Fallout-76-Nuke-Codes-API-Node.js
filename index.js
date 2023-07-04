@@ -9,6 +9,7 @@ const cheerio = require('cheerio');
 const express = require('express');
 const puppeteer = require('puppeteer');
 const redis = require('redis');
+const moment = require('moment');
 const LogManager = require('./LogManager.js');
 const logger = new LogManager();
 
@@ -125,12 +126,20 @@ app.get('/', async (req, res) => {
         else if (cacheValues.every(value => value !== null)) // If all cache values are not null, return them from the Redis cache
         {
             logger.debug('[REDIS -> EXPRESS] - Retrieved data from cache');
+            console.log(cacheValues[3]);
+            const renewalTime = moment(cacheValues[3], "DD/MM/YYYY, HH:mm:ss");
+            const remainingTime = moment.duration(renewalTime.diff(moment()));
+            const days = remainingTime.days();
+            const hours = remainingTime.hours();
+            const minutes = remainingTime.minutes();
+            const seconds = remainingTime.seconds();
+            const remainingTimeString = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
             const response = {
                 Alpha: cacheValues[0],
                 Bravo: cacheValues[1],
                 Charlie: cacheValues[2],
-                ResetsIn: cacheResetsInMatch,
+                ResetsIn: remainingTimeString,
                 RenewalTime: cacheValues[3],
                 Cached: true,
                 PoweredBy: 'Redis',
