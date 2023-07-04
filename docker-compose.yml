@@ -19,3 +19,4 @@ volumes:
     driver_opts:
       type: bind
       device: /srv/docker_data/
+      o: bind
