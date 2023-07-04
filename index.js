@@ -76,9 +76,9 @@ app.use((req, res, next) => {
     {
         logger.debug("[API] - Request from localhost, skipping logging...")
     }
-    else if(isUptimeKuma)
+    else if(isUptimeKuma && (req.headers['cf-connecting-ip'] == "93.48.169.84" || req.headers['cf-connecting-ip'] == "93.48.169.84"))
     {
-        logger.debug("[API] - Request from Uptime Kuma, skipping logging...")
+        logger.debug("[API] - Request from Lyz's Uptime Kuma Instace, skipping logging...")
     }
     else
     {
