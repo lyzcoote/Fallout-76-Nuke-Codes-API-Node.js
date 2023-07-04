@@ -21,7 +21,7 @@ module.exports = class LogManager {
     checkLogDirectory() {
         this.logDir = process.env.APPDATA || (process.platform === 'darwin' ? process.env.HOME + '/Library/Preferences' : '/var/local') || (process.platform === 'linux' ? process.env.HOME + '/.local/share' : '/var/local');
 
-        this.logDir = path.join(this.logDir, 'F76 API Server');
+        this.logDir = path.join(this.logDir, 'F76_API_Server');
 
         this.logFilePath = path.join(this.logDir, this.logFileName);
 
