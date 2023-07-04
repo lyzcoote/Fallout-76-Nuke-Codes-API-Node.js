@@ -17,14 +17,14 @@ const logger = new LogManager();
 const app = express();
 let requestCount = 1;
 
-logger.info("Here we go!")
-logger.debug(`Platform: ${process.platform}`);
-logger.debug(`Node.js Version: ${process.version}`);
-logger.debug(`Process ID: ${process.pid}`);
-logger.debug(`Process Title: ${process.title}`);
-logger.debug(`Process Arguments: ${process.argv}`);
-logger.debug(`Process Executable Path: ${process.execPath}`);
-logger.debug(`Log Directory: ${logger.returnLogDirectory()}`);
+
+logger.debug(`[START] - Platform: ${process.platform}`);
+logger.debug(`[START] - Node.js Version: ${process.version}`);
+logger.debug(`[START] - Process ID: ${process.pid}`);
+logger.debug(`[START] - Process Title: ${process.title}`);
+logger.debug(`[START] - Process Arguments: ${process.argv}`);
+logger.debug(`[START] - Process Executable Path: ${process.execPath}`);
+logger.debug(`[START] - Log Directory: ${logger.returnLogDirectory()}`);
 
 logger.info('[EXPRESS] - Initializing Express...');
 
@@ -73,24 +73,26 @@ start().then(() => {
 app.use((err, req, res, next) => {
     const userAgent = req.headers['user-agent'];
     const ip = req.ip;
+    let isUserAgentUpTimeKuma = false;
 
     try
     {
-        if(userAgent.match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g) && (req.headers['cf-connecting-ip'] === "93.48.169.84" || req.ip === "93.48.169.84"))
-        {
-            logger.debug(`[API] - Request n°${requestCount++} from UptimeKuma Bot on Lyz's Zimaboard`);
-        }
-        else
-        {
-            logger.info(`[API] - Request n°${requestCount++} from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
-        }
-        next();
+        if(userAgent.match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g) && (req.headers['cf-connecting-ip'] === "93.48.169.84" || req.ip === "93.48.169.84")) isUserAgentUpTimeKuma = true;
     }
     catch(err)
     {
         console.error('[API] - Failed to log request to console:', err);
         res.status(500).json({ result: 'error', error: error.message });
     }
+    if(isUserAgentUpTimeKuma)
+    {
+        logger.debug(`[API] - Request n°${requestCount++} from UptimeKuma Bot on Lyz's Zimaboard`);
+    }
+    else
+    {
+        logger.info(`[API] - Request n°${requestCount++} from ${ip}, User-Agent: ${userAgent}\nHeaders: ${JSON.stringify(req.headers)}\n`);
+    }
+    next();
 });
 
 // Main API request handler
@@ -125,8 +127,7 @@ app.get('/', async (req, res) => {
         }
         else if (cacheValues.every(value => value !== null)) // If all cache values are not null, return them from the Redis cache
         {
-            logger.debug('[REDIS -> EXPRESS] - Retrieved data from cache');
-            console.log(cacheValues[3]);
+            logger.info('[REDIS -> EXPRESS] - Retrieved data from cache');
             const renewalTime = moment(cacheValues[3], "DD/MM/YYYY, HH:mm:ss");
             const remainingTime = moment.duration(renewalTime.diff(moment()));
             const days = remainingTime.days();
