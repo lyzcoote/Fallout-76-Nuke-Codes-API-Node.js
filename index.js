@@ -72,6 +72,7 @@ start().then(() => {
 // Log requests to console for debugging reasons, this will be replaced with a proper logger later
 app.use((req, res, next) => {
     let isUptimeKuma = req.headers['user-agent'].match(/Uptime-Kuma\/1\.\d{1,2}\.\d{1,2}/g);
+    res.setHeader( 'X-Powered-By', 'Not a Windows BackOffice 4.5 Instance running on a MIPS Box emulated by a Protogen' );
     if(!req.headers['cf-connecting-ip'])
     {
         logger.debug(`[API] - Request n°${requestCount++} from localhost, skipping logging...`)
@@ -79,6 +80,10 @@ app.use((req, res, next) => {
     else if(isUptimeKuma && (req.headers['cf-connecting-ip'] == "93.48.169.84" || req.headers['cf-connecting-ip'] == "93.48.169.84"))
     {
         logger.debug(`[API] - Request n°${requestCount++} from Lyz's Uptime Kuma Instace, skipping logging...`)
+    }
+    else if(req.headers['user-agent'] === "Kraither Cache-Purger Staging" && (req.headers['cf-connecting-ip'] == "93.48.169.84" || req.headers['cf-connecting-ip'] == "93.48.169.84"))
+    {
+        logger.debug(`[API] - Request n°${requestCount++} from Lyz's Cache-Purger Instace, skipping logging...`)
     }
     else
     {
