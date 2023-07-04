@@ -143,7 +143,7 @@ app.get('/', async (req, res) => {
                 PoweredBy: 'Redis',
                 isTimeAprox: true
             };
-
+            console.debug("[API] - Sending response to client is: \n"+JSON.stringify(response));
             res.status(200).json(response);
             logger.info('[API] - Response sent to client');
         }
@@ -264,7 +264,8 @@ async function getFromNukaCrypt(req, res, force) {
         response.Cached = false;
         response.PoweredBy = 'Puppeteer';
         response.isTimeAprox = false;
-
+        
+        console.debug("[API] - Sending response to client is: \n"+JSON.stringify(response));
         res.status(200).json(response);
         logger.info('[API] - Response sent to client');
 
@@ -280,6 +281,7 @@ async function getFromNukaCrypt(req, res, force) {
                 ResetsIn: resetsIn,
                 RenewalTime: renewalTime
             };
+            console.debug("[API -> REDIS] - Sending response to REDIS is: \n"+JSON.stringify(redisResponse));
             for (const [key, value] of Object.entries(redisResponse)) {
                 try {
                     await redisClient.set(key, value);
