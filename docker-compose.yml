@@ -12,3 +12,4 @@ services:
       - '8076:80'
     volumes:
       - /srv/docker_data/f76-api/logs:/var/local/F76_API_Server
+    restart: unless-stopped
