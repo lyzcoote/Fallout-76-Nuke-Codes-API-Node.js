@@ -149,7 +149,8 @@ app.get('/', async (req, res) => {
         }
         else if(cacheValues.every(value => value === null))
         {
-            res.status(404).json({ result: 'temp error', error: 'Cache is empty, retry again' });
+            res.status(404).json({ result: 'temp error', error: 'Cache is empty, retry again while I fetch new data' });
+            await getFromNukaCrypt(req, res, "only-save");
         }
         else // If any of the cache values are null, fetch from NukaCrypt and save to Redis
         {
@@ -268,13 +269,15 @@ async function getFromNukaCrypt(req, res, force) {
         response.Cached = false;
         response.PoweredBy = 'Puppeteer';
         response.isTimeAprox = false;
+        if(force !== "only-save")
+        {
+            console.debug("[API] - Sending response to client is: \n"+JSON.stringify(response));
+            res.status(200).json(response);
+            logger.info('[API] - Response sent to client');
+        }
         
-        console.debug("[API] - Sending response to client is: \n"+JSON.stringify(response));
-        res.status(200).json(response);
-        logger.info('[API] - Response sent to client');
-
-        // Save to Redis if not forced
-        if (!force) {
+        // Save to Redis if not forced or forced to save ONLY
+        if (!force || force === "only-save") {
             // Saving to Redis
             logger.info('[FETCHER -> REDIS] - Saving to Redis');
             // Exclude Cached, PoweredBy and isTimeAprox from saving to Redis
