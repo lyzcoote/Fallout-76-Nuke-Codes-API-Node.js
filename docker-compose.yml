@@ -8,6 +8,7 @@ services:
       REDIS_HOST: "${REDIS_HOST}"
       REDIS_PORT: "${REDIS_PORT}"
       REDIS_PASS: "${REDIS_PASS}"
+      DEBUG_TYPE: "${DEBUG_TYPE}"
     ports:
       - '8076:80'
     volumes:
