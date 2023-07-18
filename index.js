@@ -312,7 +312,7 @@ async function getFromNukaCrypt(req, res, force) {
     }
     finally
     {
-        res.status(503).json({ result: 'error', error: error.message });
+        res.status(503).json({ result: 'error', error: 'Service Unavailable while trying to get Non-Cached Data' });
     }
 }
 
