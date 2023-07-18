@@ -257,13 +257,20 @@ async function getFromNukaCrypt(req, res, force) {
         const resetsInTime = resetsIn ? parseResetTime(resetsIn) : null;
         const renewalTime = resetsInTime ? calculateRenewalTime(new Date(), resetsInTime) : null;
 
+
+        if((alphaCode, bravoCode, charlieCode, resetsIn) === "") // If any of the codes are empty, throw an error
+        {
+            logger.error('[FETCHER] - Empty codes received from NukaCrypt');
+            throw new Error('Empty codes received from NukaCrypt');
+        }
+
         // Setup response
         const response = {
-            Alpha: alphaCode,
-            Bravo: bravoCode,
-            Charlie: charlieCode,
-            ResetsIn: resetsIn,
-            RenewalTime: renewalTime
+            Alpha: alphaCode || 'N/A',
+            Bravo: bravoCode || 'N/A',
+            Charlie: charlieCode || 'N/A',
+            ResetsIn: resetsIn || '6d 0h 0m 0s',
+            RenewalTime: renewalTime || '01/01/2024, 00:00:00',
         };
 
         // Return response
@@ -302,7 +309,10 @@ async function getFromNukaCrypt(req, res, force) {
         }
     } catch (error) {
         console.error("Main App Crash: \n" + error);
-        res.status(500).json({ result: 'error', error: error.message });
+    }
+    finally
+    {
+        res.status(503).json({ result: 'error', error: error.message });
     }
 }
 
