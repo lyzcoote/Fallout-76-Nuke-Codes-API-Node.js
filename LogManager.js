@@ -8,9 +8,9 @@ let dateNow = new Date();
 let dateStamp = dateFormat(dateNow, "yyyy-mm-dd HH-MM-ss");
 
 module.exports = class LogManager {
-    constructor() {
+    constructor(debugType) {
         this.logger = null;
-
+        this.debugType = debugType;
         this.logDir = '';
         this.logFilePath = '';
         this.logFileName = util.format('%s.log', dateStamp)
@@ -28,6 +28,10 @@ module.exports = class LogManager {
         if (!fs.existsSync(this.logDir)) {
             console.log('[LOGGER] - Creating directory');
             fs.mkdirSync(this.logDir);
+        }
+
+        if(this.debugType) {
+            console.log('[LOGGER] - Debugging loggin enabled');
         }
 
         /*var stream = fs.createWriteStream(this.logFilePath, {
@@ -65,10 +69,12 @@ module.exports = class LogManager {
     }
 
     debug(message) {
+        if(this.debugType) {
         var stream = this.openFile();
         stream.write(this.logLine('DEBUG', message));
         this.closeFile(stream);
-        this.logToConsole(message);
+        this.logToConsole("[!] DEBUG [!] - " + message);
+        }
     }
 
     error(exception) {

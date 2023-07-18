@@ -11,7 +11,7 @@ const puppeteer = require('puppeteer');
 const redis = require('redis');
 const moment = require('moment');
 const LogManager = require('./LogManager.js');
-const logger = new LogManager();
+const logger = new LogManager(process.env.DEBUG_TYPE || false);
 
 // Initialize Express and Redis
 const app = express();
@@ -253,6 +253,7 @@ async function getFromNukaCrypt(req, res, force) {
         const bravoCode = $('.pl3:nth-child(2) > div:nth-child(2)').text().trim();
         const charlieCode = $('.pl3:nth-child(3) > div:nth-child(2)').text().trim();
         const resetsIn = $('.flex-auto > div > span').text().trim();
+        logger.debug('[FETCHER] - Scraped data from NukaCrypt is: \n'+JSON.stringify({ alphaCode, bravoCode, charlieCode, resetsIn }));
         const resetsInTime = resetsIn ? parseResetTime(resetsIn) : null;
         const renewalTime = resetsInTime ? calculateRenewalTime(new Date(), resetsInTime) : null;
 
@@ -269,7 +270,7 @@ async function getFromNukaCrypt(req, res, force) {
         response.Cached = false;
         response.PoweredBy = 'Puppeteer';
         response.isTimeAprox = false;
-        if(force !== "only-save")
+        if(force !== "only-save") // If headers are not set to only-save, send response to client
         {
             console.debug("[API] - Sending response to client is: \n"+JSON.stringify(response));
             res.status(200).json(response);
