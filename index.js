@@ -149,7 +149,7 @@ app.get('/', async (req, res) => {
         }
         else if(cacheValues.every(value => value === null))
         {
-            res.status(404).json({ result: 'temp error', error: 'Cache is empty, retry again while I fetch new data' });
+            res.status(205).json({ result: 'temp error', error: 'Cache is empty, retry again while I fetch new data' });
             await getFromNukaCrypt(req, res, "only-save");
         }
         else // If any of the cache values are null, fetch from NukaCrypt and save to Redis
