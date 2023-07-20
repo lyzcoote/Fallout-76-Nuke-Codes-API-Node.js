@@ -310,10 +310,6 @@ async function getFromNukaCrypt(req, res, force) {
     } catch (error) {
         console.error("Main App Crash: \n" + error);
     }
-    finally
-    {
-        res.status(503).json({ result: 'error', message: 'Service Unavailable while trying to get Non-Cached Data' });
-    }
 }
 
 function isAuth(req, res, next) {
